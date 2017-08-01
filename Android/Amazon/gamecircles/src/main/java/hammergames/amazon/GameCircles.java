@@ -46,7 +46,7 @@ public class GameCircles extends Application
     }
 
     // Initialize Amazon Game Circles
-    public void init ( String appKey, boolean testMode )
+    public void init ()
     {
         Log.d ( tag , "Initializing Amazon Ads plugin.");
         AmazonGamesClient.initialize(activity, callback, myGameFeatures);

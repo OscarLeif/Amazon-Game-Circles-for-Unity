@@ -23,6 +23,7 @@ dependencies {
     provided files('./libs/UnityPlayer.jar') // Avoid redundant Unity Player in final application APK
     compile files('./libs/gamecirclesdk.jar')
     compile files('./libs/login-with-amazon-sdk.jar')
+    compile files('./libs/AmazonInsights-android-sdk-2.1.26.jar')
 }
 
 android.libraryVariants.all { variant ->

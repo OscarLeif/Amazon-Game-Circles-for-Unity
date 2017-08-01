@@ -19,7 +19,7 @@
       <action android:name="android.intent.action.VIEW" />
       <category android:name="android.intent.category.DEFAULT" />
       <category android:name="android.intent.category.BROWSABLE" />
-      <data android:host="your.own.package" android:scheme="amzn" />
+      <data android:host="com.hammergames.flappyplane" android:scheme="amzn" />
       </intent-filter>
       </activity>
       <activity android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface"
@@ -38,5 +38,8 @@
         <!-- End Requirements for use Amazon Game Circles DSK -->
 
     </application>
+
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
 </manifest>
