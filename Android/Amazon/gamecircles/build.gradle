@@ -18,7 +18,8 @@ android {
     }
 }
 
-dependencies {
+dependencies
+{
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     provided files('./libs/UnityPlayer.jar') // Avoid redundant Unity Player in final application APK
     compile files('./libs/gamecirclesdk.jar')
