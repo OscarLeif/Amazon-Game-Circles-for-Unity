@@ -71,6 +71,10 @@ public class GameCircles extends Application
         return isSigned;
     }
 
+    public boolean isGameServicesAvaliable()
+    {
+        return gameServicesAvaliable;
+    }
 
     public void ShowLeaderboardsOverlay()
     {
