@@ -93,9 +93,23 @@ public class GameCircles extends Application
         }
     }
 
-    public void ShowLeaderboard(String leaderboardId)
+    public void ShowLeaderboardOverlay(String leaderboardId)
     {
-        Log.d("AmazonGameCircle", "Show Leaderboards overlay");
+        Log.d(tag, "Show Leaderboard By Id");
+        if(gameServicesAvaliable)
+        {
+            LeaderboardsClient lbClients = agsClient.getLeaderboardsClient();
+            if(lbClients!=null)
+            {
+                lbClients.showLeaderboardOverlay(leaderboardId);
+            }
+        }
+    }
+
+    //TODO Fix this and test I don't remember the use of this
+    public void GetLeaderboards(String leaderboardId)
+    {
+        Log.d("AmazonGameCircle", "Get Leaderboards ");
         if (gameServicesAvaliable)
         {
             LeaderboardsClient lbClient = agsClient.getLeaderboardsClient();
