@@ -1,4 +1,4 @@
-package hammergames.amazon;
+package hammergames.amazonGC;
 
 import android.app.Activity;
 import android.app.Application;
@@ -39,14 +39,14 @@ public class GameCircles extends Application
     public static GameCircles getInstance()
     {
         GameCircles.instance.activity = UnityPlayer.currentActivity;
-        Log.d(tag, "Amazon Ads Plugin instantiated.");
+        Log.d(tag, "Amazon Game Circles Plugin instantiated.");
         return GameCircles.instance;
     }
 
     // Initialize Amazon Game Circles
     public void init()
     {
-        Log.d(tag, "Initializing Amazon Ads plugin.");
+        Log.d(tag, "Initializing Amazon Game Circles plugin.");
         AmazonGamesClient.initialize(activity, callback, myGameFeatures);
         IsInitialized = true;
     }

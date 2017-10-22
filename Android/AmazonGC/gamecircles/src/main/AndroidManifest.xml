@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 
-    package="hammergames.amazon">
+    package="hammergames.amazonGC">
 
     <application
         android:allowBackup="true"
@@ -19,7 +19,7 @@
       <action android:name="android.intent.action.VIEW" />
       <category android:name="android.intent.category.DEFAULT" />
       <category android:name="android.intent.category.BROWSABLE" />
-      <data android:host="com.hammergames.flappyplane" android:scheme="amzn" />
+      <data android:host="com.hammergamesdev.jumpingcat" android:scheme="amzn" />
       </intent-filter>
       </activity>
       <activity android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface"
