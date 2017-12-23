@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GameCircles : PluginSingleton<GameCircles>
 {
+    private static string AndroidJavaClassName = "hammergames.amazonGC.GameCircles";
     private AndroidJavaObject plugin;
 
     private bool m_isInit = false;
@@ -12,7 +13,7 @@ public class GameCircles : PluginSingleton<GameCircles>
     {
         base.Awake();
 #if UNITY_ANDROID && !UNITY_EDITOR
-        AndroidJavaClass jc = new AndroidJavaClass("hammergames.amazon.GameCircles");
+        AndroidJavaClass jc = new AndroidJavaClass(AndroidJavaClassName);
         plugin = jc.CallStatic<AndroidJavaObject>("getInstance");
 #endif
     }

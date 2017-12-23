@@ -40,7 +40,7 @@ android.libraryVariants.all { variant ->
     String sourceAARName = "${project.name}-${variant.name}.aar";
 
     // Target.
-    String targetAssetFolder = "Assets/Plugins/Amazon";
+    String targetAssetFolder = "Assets/Plugins/AmazonGC";
     String targetAARFolder = "${rootDir.getPath()}/../../${targetAssetFolder}"; // Navigate into 'Assets'
     String targetAARName = "AmazonGameCircles.aar"; // The form you ship your plugin
 
