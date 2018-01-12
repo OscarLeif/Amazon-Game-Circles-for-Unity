@@ -64,6 +64,7 @@ public class GameCircles extends Application
                 }
             }
         }
+
         //This should be do it but how can I return this to Unity?
         //I only know using a String in some project that I don't remember using this
         // That is the reason of the UnityObjName

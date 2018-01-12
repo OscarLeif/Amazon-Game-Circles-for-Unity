@@ -2,28 +2,60 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameCircles : PluginSingleton<GameCircles>
+public class GameCircles : MonoBehaviour
 {
     private static string AndroidJavaClassName = "hammergames.amazonGC.GameCircles";
     private AndroidJavaObject plugin;
-
     private bool m_isInit = false;
+
+    private static GameCircles inst = null;
+
+    public static GameCircles Inst
+    {
+        get
+        {
+            if (inst == null)
+            {
+                inst = GameObject.FindObjectOfType<GameCircles>();
+                if (inst == null)
+                {
+                    GameObject singleton = new GameObject(typeof(GameCircles).Name);
+                    inst = singleton.AddComponent<GameCircles>();
+                    inst.name = typeof(GameCircles).Name;
+                }
+            }
+            return inst;
+        }
+    }
+
+    private void Init()
+    {
+    }
 
     private void Awake()
     {
-        base.Awake();
-#if UNITY_ANDROID && !UNITY_EDITOR
-        AndroidJavaClass jc = new AndroidJavaClass(AndroidJavaClassName);
-        plugin = jc.CallStatic<AndroidJavaObject>("getInstance");
-#endif
+        if (inst == null)
+        {
+            inst = Inst;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 
     // Use this for initialization
     private void Start()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
+        AndroidJavaClass jc = new AndroidJavaClass(AndroidJavaClassName);
+        plugin = jc.CallStatic<AndroidJavaObject>("getInstance");
+#endif
+#if UNITY_ANDROID && !UNITY_EDITOR
         plugin.Call("init");
 #endif
+        Debug.Log("Start Called");
     }
 
     public void ShowLeaderboardsOverlay()
@@ -63,12 +95,12 @@ public class GameCircles : PluginSingleton<GameCircles>
 
     public bool IsSignedIn()
     {
-        //TODO Warning this is in Development
-        //Check Android Studio Project;
-        return false;
+        bool signed = false;
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            signed = plugin.Call<bool>("isSigned");
+#endif
+        }
+        return signed;
     }
-
-
-
-
 }
