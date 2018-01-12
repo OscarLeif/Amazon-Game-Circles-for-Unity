@@ -103,4 +103,12 @@ public class GameCircles : MonoBehaviour
         }
         return signed;
     }
+
+    public void ShowSignDialog()
+    {
+        Debug.Log("Touch Is Working");
+#if UNITY_ANDROID && !UNITY_EDITOR
+            plugin.Call("ShowSignDialog");
+#endif
+    }
 }

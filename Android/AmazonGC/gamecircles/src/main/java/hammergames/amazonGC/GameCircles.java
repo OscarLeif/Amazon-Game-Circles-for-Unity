@@ -24,7 +24,7 @@ import java.util.EnumSet;
 
 public class GameCircles extends Application
 {
-    public static String tag = "Game Circles Plugin";
+    public static String TAG = "Game Circles Plugin";
     public static String UnityObjName = "AmazonGameCircles";
     private static final GameCircles instance = new GameCircles();
 
@@ -39,14 +39,14 @@ public class GameCircles extends Application
     public static GameCircles getInstance()
     {
         GameCircles.instance.activity = UnityPlayer.currentActivity;
-        Log.d(tag, "Amazon Game Circles Plugin instantiated.");
+        Log.d(TAG, "Amazon Game Circles Plugin instantiated.");
         return GameCircles.instance;
     }
 
     // Initialize Amazon Game Circles
     public void init()
     {
-        Log.d(tag, "Initializing Amazon Game Circles plugin.");
+        Log.d(TAG, "Initializing Amazon Game Circles plugin.");
         AmazonGamesClient.initialize(activity, callback, myGameFeatures);
         IsInitialized = true;
     }
@@ -96,7 +96,7 @@ public class GameCircles extends Application
 
     public void ShowLeaderboardOverlay(String leaderboardId)
     {
-        Log.d(tag, "Show Leaderboard By Id");
+        Log.d(TAG, "Show Leaderboard By Id");
         if(gameServicesAvaliable)
         {
             LeaderboardsClient lbClients = agsClient.getLeaderboardsClient();
@@ -123,7 +123,7 @@ public class GameCircles extends Application
 
     public void SubmitScoreLeaderboard(String leaderboardId, int score)
     {
-        Log.d(tag, "Start submit score");
+        Log.d(TAG, "Start submit score");
         if (gameServicesAvaliable)
         {
             LeaderboardsClient lbClient = agsClient.getLeaderboardsClient();
@@ -147,7 +147,7 @@ public class GameCircles extends Application
             });
         } else
         {
-            Log.d(tag, "Developer mode this only work using a Signed App");
+            Log.d(TAG, "Developer mode this only work using a Signed App");
         }
     }
 
@@ -173,6 +173,23 @@ public class GameCircles extends Application
             {
                 acClient.showAchievementsOverlay(achievementId);
             }
+        }
+    }
+
+    public void ShowSignDialog()
+    {
+        if (gameServicesAvaliable)
+        {
+            Log.d(TAG, "Show Sign Dialog");
+            if(agsClient!=null)
+            {
+                agsClient.showSignInPage();
+            }
+            else
+            {
+                Log.d(TAG,"Game Circles client not ready");
+            }
+
         }
     }
 
