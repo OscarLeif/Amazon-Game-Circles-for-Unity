@@ -28,10 +28,6 @@ public class GameCircles : MonoBehaviour
         }
     }
 
-    private void Init()
-    {
-    }
-
     private void Awake()
     {
         if (inst == null)
