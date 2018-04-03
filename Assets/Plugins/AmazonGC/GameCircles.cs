@@ -1,110 +1,184 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameCircles : MonoBehaviour
 {
-    private static string AndroidJavaClassName = "hammergames.amazonGC.GameCircles";
-    private AndroidJavaObject plugin;
-    private bool m_isInit = false;
+    #region Fields
 
-    private static GameCircles inst = null;
+    [CanBeNull]
+    private static GameCircles _instance = null;
 
-    public static GameCircles Inst
+    [SerializeField]
+    private bool _persistent = true;
+
+    [NotNull]
+    private static readonly object Lock = new object();
+
+    public static bool Quitting { get; private set; }
+
+    #endregion          
+
+    #region Properties
+    [NotNull]
+    public static GameCircles Instance
     {
         get
         {
-            if (inst == null)
+            if (Quitting)
             {
-                inst = GameObject.FindObjectOfType<GameCircles>();
-                if (inst == null)
-                {
-                    GameObject singleton = new GameObject(typeof(GameCircles).Name);
-                    inst = singleton.AddComponent<GameCircles>();
-                    inst.name = typeof(GameCircles).Name;
-                }
+                return null;
             }
-            return inst;
+            lock (Lock)
+            {
+                if (_instance != null)
+                {
+                    return _instance;
+                }
+                var instances = FindObjectsOfType<GameCircles>();
+                var count = instances.Length;
+                if (count > 0)
+                {
+                    if (count == 1)
+                    {
+                        return _instance = instances[0];
+                    }
+                    for (var i = 1; i < instances.Length; i++)
+                    {
+                        Destroy(instances[i]);
+                    }
+                    return _instance = instances[0];
+                }
+                return _instance = new GameObject(typeof(GameCircles).Name).AddComponent<GameCircles>();
+            }
         }
     }
+    #endregion
+
+    #region GameCircles Fields
+
+    public bool PluginEnable = false;
+
+    //Package name of the javaObject
+    private static string AndroidJavaClassName = "hammergames.amazonGC.GameCircles";
+
+    private AndroidJavaObject javaObject;
+
+    private bool m_isInit = false;
+
+    #endregion
+
+    #region Monobehaviour Methods
 
     private void Awake()
     {
-        if (inst == null)
+        if (_persistent)
         {
-            inst = Inst;
-            DontDestroyOnLoad(this.gameObject);
-        }
-        else
-        {
-            Destroy(this.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
     }
 
     // Use this for initialization
     private void Start()
     {
+        if (PluginEnable)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
         AndroidJavaClass jc = new AndroidJavaClass(AndroidJavaClassName);
-        plugin = jc.CallStatic<AndroidJavaObject>("getInstance");
+        javaObject = jc.CallStatic<AndroidJavaObject>("getInstance");
 #endif
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("init");
+        javaObject.Call("init");
+        this.m_isInit = true;
 #endif
-        Debug.Log("Start Called");
+            Debug.Log("Start Called");
+        }
     }
+
+    private void OnApplicationQuit()
+    {
+        Quitting = true;
+    }
+
+    #endregion
+
+    #region Game Circles Methods
 
     public void ShowLeaderboardsOverlay()
     {
+        if (PluginEnable && this.m_isInit)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("ShowLeaderboardsOverlay");
+        javaObject.Call("ShowLeaderboardsOverlay");
 #endif
+        }
     }
 
-    public void ShowLeaderboardOverlay(string leaderboardId, int score)
+    public void ShowLeaderboardOverlay(string leaderboardId)
     {
+        if (PluginEnable && this.m_isInit)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("ShowLeaderboard",leaderboardId, score );
+        javaObject.Call("ShowLeaderboardOverlay",leaderboardId);
 #endif
+        }
     }
 
     public void SubmitScore(string leaderboardId, int score)
     {
+        if (PluginEnable && this.m_isInit)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("SubmitScoreLeaderboard", leaderboardId,score);
+        javaObject.Call("SubmitScoreLeaderboard", leaderboardId,score);
 #endif
+        }
     }
 
     public void ShowAchievementsOverlay()
     {
+        if (PluginEnable && this.m_isInit)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("ShowAchievementsOverlay");
+        javaObject.Call("ShowAchievementsOverlay");
 #endif
+        }
     }
 
     public void ShowAchievement(string achievementId)
     {
+        if (PluginEnable && this.m_isInit)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
-        plugin.Call("ShowAchievementOverlay", achievementId);
+        javaObject.Call("ShowAchievementOverlay", achievementId);
 #endif
+        }
     }
 
     public bool IsSignedIn()
     {
         bool signed = false;
+        if (PluginEnable && this.m_isInit)
         {
+            {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            signed = plugin.Call<bool>("isSigned");
+            signed = javaObject.Call<bool>("isSigned");
 #endif
+            }
         }
         return signed;
     }
 
     public void ShowSignDialog()
     {
-        Debug.Log("Touch Is Working");
+        if (PluginEnable && this.m_isInit)
+        {
+            Debug.Log("Touch Is Working");
 #if UNITY_ANDROID && !UNITY_EDITOR
-            plugin.Call("ShowSignDialog");
+            javaObject.Call("ShowSignDialog");
 #endif
+        }
     }
+
+    #endregion
 }
