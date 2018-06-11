@@ -1,0 +1,62 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compileOnly files('./libs/UnityPlayer.jar') // Avoid redundant Unity Player in final application APK
+    implementation files('./libs/gamecirclesdk.jar')
+    implementation files('./libs/login-with-amazon-sdk.jar')
+    implementation files('./libs/AmazonInsights-android-sdk-2.1.26.jar')
+}
+
+android.libraryVariants.all { variant ->
+
+    // Task names.
+    String variantName = "${variant.name.capitalize()}"; // Like 'Debug'
+    String deployTaskGroup = "plugin";
+    String deployTaskName = "deploy${variantName}PluginArchive"; // Like 'deployDebugPluginArchive'
+    String dependencyTaskName = "assemble${variantName}"; // Like 'assembleDebug'
+
+    // Source.
+    String sourceAARFolder = "${buildDir.getPath()}/outputs/aar/";
+    String sourceAARName = "${project.name}-${variant.name}.aar";
+
+    // Target.
+    String targetAssetFolder = "Assets/Plugins/AmazonGC";
+    String targetAARFolder = "${rootDir.getPath()}/../../${targetAssetFolder}"; // Navigate into 'Assets'
+    String targetAARName = "AmazonGameCircles.aar"; // The form you ship your plugin
+
+    // Create task.
+    task(deployTaskName, dependsOn: dependencyTaskName, type: Copy) {
+        logger.lifecycle("${variant.name.capitalize()} AAR Folder: ${sourceAARFolder}")
+        logger.lifecycle("${variant.name.capitalize()} Target AAR Folder: ${targetAARFolder}")
+        logger.lifecycle("${variant.name.capitalize()} Target AAR name: ${targetAARName}")
+
+        from(sourceAARFolder)
+        into(targetAARFolder)
+        include(sourceAARName)
+        rename(sourceAARName, targetAARName)
+    }.group = deployTaskGroup;
+}

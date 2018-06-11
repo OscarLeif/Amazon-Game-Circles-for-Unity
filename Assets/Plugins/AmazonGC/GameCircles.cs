@@ -58,12 +58,11 @@ public class GameCircles : MonoBehaviour
 
     #region GameCircles Fields
 
-    public bool PluginEnable = false;
+    AndroidJavaClass _class;
 
-    //Package name of the javaObject
-    private static string AndroidJavaClassName = "hammergames.amazonGC.GameCircles";
+    AndroidJavaObject javaObject { get { return _class.GetStatic<AndroidJavaObject>("instance"); } }
 
-    private AndroidJavaObject javaObject;
+    public bool PluginEnable = false;    
 
     private bool m_isInit = false;
 
@@ -80,18 +79,18 @@ public class GameCircles : MonoBehaviour
     }
 
     // Use this for initialization
-    private void Start()
+    private IEnumerator Start()
     {
         if (PluginEnable)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        AndroidJavaClass jc = new AndroidJavaClass(AndroidJavaClassName);
-        javaObject = jc.CallStatic<AndroidJavaObject>("getInstance");
-#endif
-#if UNITY_ANDROID && !UNITY_EDITOR
-        javaObject.Call("init");
-        this.m_isInit = true;
-#endif
+            yield return new WaitForSeconds(1.0f);
+
+            _class = new AndroidJavaClass("plugins.ata.GameCircles");
+            _class.CallStatic("start", gameObject.name);
+
+            //#if UNITY_ANDROID && !UNITY_EDITOR
+            //#endif
+
             Debug.Log("Start Called");
         }
     }
@@ -109,9 +108,9 @@ public class GameCircles : MonoBehaviour
     {
         if (PluginEnable && this.m_isInit)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+//#if UNITY_ANDROID && !UNITY_EDITOR
         javaObject.Call("ShowLeaderboardsOverlay");
-#endif
+//#endif
         }
     }
 
