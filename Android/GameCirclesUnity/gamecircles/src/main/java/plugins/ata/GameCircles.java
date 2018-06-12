@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.amazon.ags.api.AGResponseCallback;
 import com.amazon.ags.api.AGResponseHandle;
+import com.amazon.ags.api.AmazonGames;
 import com.amazon.ags.api.AmazonGamesCallback;
 import com.amazon.ags.api.AmazonGamesClient;
 import com.amazon.ags.api.AmazonGamesFeature;
@@ -33,16 +34,22 @@ public class GameCircles extends Fragment
     //region Amazon Game circles variables
     private AmazonGamesClient agsClient;
 
+    private AmazonGamesStatus amazonGamesStatus;
+
     private AmazonGamesCallback callback = new AmazonGamesCallback()
     {
         @Override
         public void onServiceReady(AmazonGamesClient amazonGamesClient) {
-            agsClient = amazonGamesClient;
+            instance.agsClient = amazonGamesClient;
+            //Toast.makeText(UnityPlayer.currentActivity, "Game Circles working fine", Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onServiceNotReady(AmazonGamesStatus amazonGamesStatus) {
-            Toast.makeText(UnityPlayer.currentActivity, "Failed to Initialize", Toast.LENGTH_SHORT);
+            //Toast.makeText(UnityPlayer.currentActivity, "Failed to Initialize", Toast.LENGTH_LONG).show();
+            instance.amazonGamesStatus = amazonGamesStatus;
+            instance.agsClient = null;
+            instance.Init();
         }
     };
 
@@ -71,7 +78,7 @@ public class GameCircles extends Fragment
     public void onResume()
     {
         super.onResume();
-        AmazonGamesClient.initialize(UnityPlayer.currentActivity, callback, myGameFeatures);
+        this.Init();
     }
 
     @Override
@@ -96,6 +103,11 @@ public class GameCircles extends Fragment
 
     //region Amazon Game Circles Functions
 
+    public void Init()
+    {
+        AmazonGamesClient.initialize(UnityPlayer.currentActivity, callback, myGameFeatures);
+    }
+
     public void ShowLeaderboardsOverlay()
     {
         Log.d("AmazonGameCircle", "Show Leaderboards overlay");
@@ -106,16 +118,17 @@ public class GameCircles extends Fragment
             {
                 lbClients.showLeaderboardsOverlay();
             }
-        } else
+        }
+        else
         {
-            Log.i("Amazon GameCircle:", "If you're on debug this is normal to appear Game Circles doesn't work in debug mode");
-            Log.e("Amazon GameCircle:", "Please check if the app is signed or check your manifest settings");
+            Toast.makeText(UnityPlayer.currentActivity, "Game service is not ready please wait", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void ShowLeaderboardOverlay(String leaderboardId)
     {
         Log.d(TAG, "Show Leaderboard By Id");
+
         if(this.agsClient!=null)
         {
             LeaderboardsClient lbClients = agsClient.getLeaderboardsClient();
@@ -123,6 +136,10 @@ public class GameCircles extends Fragment
             {
                 lbClients.showLeaderboardOverlay(leaderboardId);
             }
+        }
+        else
+        {
+            Toast.makeText(UnityPlayer.currentActivity, "Game service is not ready please wait", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -134,7 +151,7 @@ public class GameCircles extends Fragment
             LeaderboardsClient lbClient = agsClient.getLeaderboardsClient();
             AGResponseHandle<SubmitScoreResponse> handle = lbClient.submitScore(leaderboardId, score);
 
-            //Optional callback to recieve notification of success or failure
+            //Optional callback to receive notification of success or failure
             handle.setCallback(new AGResponseCallback<SubmitScoreResponse>()
             {
                 @Override
@@ -146,7 +163,7 @@ public class GameCircles extends Fragment
                     } else
                     {
                         // continue game flow.
-                        Toast.makeText(UnityPlayer.currentActivity, "Record updated", Toast.LENGTH_SHORT);
+                        Toast.makeText(UnityPlayer.currentActivity, "Record updated", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -214,6 +231,10 @@ public class GameCircles extends Fragment
         return isSigned;
     }
 
-    //endregion
+    public void check()
+    {
 
+    }
+
+    //endregion
 }

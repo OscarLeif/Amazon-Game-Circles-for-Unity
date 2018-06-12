@@ -62,7 +62,7 @@ public class GameCircles : MonoBehaviour
 
     AndroidJavaObject javaObject { get { return _class.GetStatic<AndroidJavaObject>("instance"); } }
 
-    public bool PluginEnable = false;    
+    public bool PluginEnable = false;
 
     private bool m_isInit = false;
 
@@ -79,19 +79,12 @@ public class GameCircles : MonoBehaviour
     }
 
     // Use this for initialization
-    private IEnumerator Start()
+    private void Start()
     {
         if (PluginEnable)
         {
-            yield return new WaitForSeconds(1.0f);
-
-            _class = new AndroidJavaClass("plugins.ata.GameCircles");
-            _class.CallStatic("start", gameObject.name);
-
-            //#if UNITY_ANDROID && !UNITY_EDITOR
-            //#endif
-
-            Debug.Log("Start Called");
+            this.Init();
+            this.m_isInit = true;
         }
     }
 
@@ -104,13 +97,29 @@ public class GameCircles : MonoBehaviour
 
     #region Game Circles Methods
 
+    public void Init()
+    {
+        _class = new AndroidJavaClass("plugins.ata.GameCircles");
+        _class.CallStatic("start", gameObject.name);
+        this.m_isInit = true;
+        //#if UNITY_ANDROID && !UNITY_EDITOR
+        //#endif
+
+        Debug.Log("Start Called");
+    }
+
+    public void InitGamecircles()
+    {
+        javaObject.Call("Init");
+    }
+
     public void ShowLeaderboardsOverlay()
     {
         if (PluginEnable && this.m_isInit)
         {
-//#if UNITY_ANDROID && !UNITY_EDITOR
-        javaObject.Call("ShowLeaderboardsOverlay");
-//#endif
+            //#if UNITY_ANDROID && !UNITY_EDITOR
+            javaObject.Call("ShowLeaderboardsOverlay");
+            //#endif
         }
     }
 
