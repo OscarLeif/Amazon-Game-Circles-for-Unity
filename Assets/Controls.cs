@@ -6,7 +6,7 @@ public class Controls : MonoBehaviour {
 
 	public void onClickInitialize()
     {
-        GameCircles.Instance.InitGamecircles();
+        //GameCircles.Instance.InitGamecircles();
     }
 
     public void onClickLogin()

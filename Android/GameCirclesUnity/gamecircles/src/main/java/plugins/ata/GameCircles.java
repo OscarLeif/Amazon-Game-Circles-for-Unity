@@ -1,13 +1,12 @@
 package plugins.ata;
 
-import android.app.Fragment;
-import android.os.Bundle;
+import android.app.Activity;
+import android.app.Application;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.amazon.ags.api.AGResponseCallback;
 import com.amazon.ags.api.AGResponseHandle;
-import com.amazon.ags.api.AmazonGames;
 import com.amazon.ags.api.AmazonGamesCallback;
 import com.amazon.ags.api.AmazonGamesClient;
 import com.amazon.ags.api.AmazonGamesFeature;
@@ -19,117 +18,86 @@ import com.unity3d.player.UnityPlayer;
 
 import java.util.EnumSet;
 
-public class GameCircles extends Fragment
+/**
+ * Created by OscarLeif on 5/6/2017.
+ */
+
+public class GameCircles extends Application
 {
+    public static String TAG = "Game Circles Plugin";
+    public static String UnityObjName = "AmazonGameCircles";
+    private static final GameCircles instance = new GameCircles();
 
-    // Constants.
-    public static final String TAG = "GameCircles_plugin";
+    private Activity activity;
+    private boolean IsInitialized = false;
+    private boolean gameServicesAvaliable;
 
-    // Singleton instance.
-    public static GameCircles instance;
-
-    // Unity Context
-    private String gameObjectName;
-
-    //region Amazon Game circles variables
     private AmazonGamesClient agsClient;
+    private LeaderboardsClient lbClient;
 
-    private AmazonGamesStatus amazonGamesStatus;
-
-    private AmazonGamesCallback callback = new AmazonGamesCallback()
+    // Get instance of the GameCirclesObject
+    public static GameCircles getInstance()
     {
-        @Override
-        public void onServiceReady(AmazonGamesClient amazonGamesClient) {
-            instance.agsClient = amazonGamesClient;
-            //Toast.makeText(UnityPlayer.currentActivity, "Game Circles working fine", Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onServiceNotReady(AmazonGamesStatus amazonGamesStatus) {
-            //Toast.makeText(UnityPlayer.currentActivity, "Failed to Initialize", Toast.LENGTH_LONG).show();
-            instance.amazonGamesStatus = amazonGamesStatus;
-            instance.agsClient = null;
-            instance.Init();
-        }
-    };
-
-    //list of features your game uses (in this example, achievements and leaderboards)
-    private EnumSet<AmazonGamesFeature> myGameFeatures = EnumSet.of(AmazonGamesFeature.Leaderboards);
-    //endregion
-
-    public static void start(String gameObjectName)
-    {
-        // Instantiate and add to Unity Player Activity.
-        instance = new GameCircles();
-        instance.gameObjectName = gameObjectName;
-        UnityPlayer.currentActivity.getFragmentManager().beginTransaction().add(instance, GameCircles.TAG).commit();
+        GameCircles.instance.activity = UnityPlayer.currentActivity;
+        Log.d(TAG, "Amazon Game Circles Plugin instantiated.");
+        return GameCircles.instance;
     }
 
-    //region Android Activity-Fragment Lifecycle
-
-    @Override
-    public void onCreate(Bundle savedInstanceState)
+    // Initialize Amazon Game Circles
+    public void init()
     {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        Log.d(TAG, "Initializing Amazon Game Circles plugin.");
+        AmazonGamesClient.initialize(activity, callback, myGameFeatures);
+        IsInitialized = true;
     }
 
-    @Override
-    public void onResume()
+    public boolean isSigned()
     {
-        super.onResume();
-        this.Init();
-    }
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        if(this.agsClient!=null)
+        boolean isSigned = false;
+        if (gameServicesAvaliable)
         {
-            agsClient.release();
+            if (agsClient != null)
+            {
+                if (agsClient.getPlayerClient().isSignedIn())
+                {
+                    isSigned = true;
+                }
+            }
         }
+
+        //This should be do it but how can I return this to Unity?
+        //I only know using a String in some project that I don't remember using this
+        // That is the reason of the UnityObjName
+        //TODO complete return value to Unity
+        return isSigned;
     }
 
-    @Override
-    public void onDestroy()
+    public boolean isGameServicesAvaliable()
     {
-        super.onDestroy();
-        agsClient.shutdown();
-    }
-
-    //endregion
-
-
-    //region Amazon Game Circles Functions
-
-    public void Init()
-    {
-        AmazonGamesClient.initialize(UnityPlayer.currentActivity, callback, myGameFeatures);
+        return gameServicesAvaliable;
     }
 
     public void ShowLeaderboardsOverlay()
     {
         Log.d("AmazonGameCircle", "Show Leaderboards overlay");
-        if (this.agsClient!=null)
+        if (gameServicesAvaliable)
         {
             LeaderboardsClient lbClients = agsClient.getLeaderboardsClient();
             if (lbClients != null)
             {
                 lbClients.showLeaderboardsOverlay();
             }
-        }
-        else
+        } else
         {
-            Toast.makeText(UnityPlayer.currentActivity, "Game service is not ready please wait", Toast.LENGTH_SHORT).show();
+            Log.i("Amazon GameCircle:", "If you're on debug this is normal to appear Game Circles doesn't work in debug mode");
+            Log.e("Amazon GameCircle:", "Please check if the app is signed or check your manifest settings");
         }
     }
 
     public void ShowLeaderboardOverlay(String leaderboardId)
     {
         Log.d(TAG, "Show Leaderboard By Id");
-
-        if(this.agsClient!=null)
+        if(gameServicesAvaliable)
         {
             LeaderboardsClient lbClients = agsClient.getLeaderboardsClient();
             if(lbClients!=null)
@@ -137,21 +105,31 @@ public class GameCircles extends Fragment
                 lbClients.showLeaderboardOverlay(leaderboardId);
             }
         }
-        else
+    }
+
+    //TODO Fix this and test I don't remember the use of this
+    public void GetLeaderboards(String leaderboardId)
+    {
+        Log.d("AmazonGameCircle", "Get Leaderboards ");
+        if (gameServicesAvaliable)
         {
-            Toast.makeText(UnityPlayer.currentActivity, "Game service is not ready please wait", Toast.LENGTH_SHORT).show();
+            LeaderboardsClient lbClient = agsClient.getLeaderboardsClient();
+            if (lbClient != null)
+            {
+                lbClient.getLeaderboards(leaderboardId);
+            }
         }
     }
 
     public void SubmitScoreLeaderboard(String leaderboardId, int score)
     {
         Log.d(TAG, "Start submit score");
-        if (this.agsClient != null)
+        if (gameServicesAvaliable)
         {
             LeaderboardsClient lbClient = agsClient.getLeaderboardsClient();
             AGResponseHandle<SubmitScoreResponse> handle = lbClient.submitScore(leaderboardId, score);
 
-            //Optional callback to receive notification of success or failure
+            //Optional callback to recieve notification of success or failure
             handle.setCallback(new AGResponseCallback<SubmitScoreResponse>()
             {
                 @Override
@@ -163,7 +141,7 @@ public class GameCircles extends Fragment
                     } else
                     {
                         // continue game flow.
-                        Toast.makeText(UnityPlayer.currentActivity, "Record updated", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "Record updated", Toast.LENGTH_SHORT);
                     }
                 }
             });
@@ -173,9 +151,10 @@ public class GameCircles extends Fragment
         }
     }
 
+
     public void ShowAchievementsOverlay()
     {
-        if (this.agsClient!=null)
+        if (gameServicesAvaliable)
         {
             AchievementsClient acClient = agsClient.getAchievementsClient();
             if (acClient != null)
@@ -187,7 +166,7 @@ public class GameCircles extends Fragment
 
     public void ShowAchievementOverlay(String achievementId)
     {
-        if (this.agsClient!=null)
+        if (gameServicesAvaliable)
         {
             AchievementsClient acClient = agsClient.getAchievementsClient();
             if (acClient != null)
@@ -199,7 +178,7 @@ public class GameCircles extends Fragment
 
     public void ShowSignDialog()
     {
-        if (this.agsClient!=null)
+        if (gameServicesAvaliable)
         {
             Log.d(TAG, "Show Sign Dialog");
             if(agsClient!=null)
@@ -211,30 +190,26 @@ public class GameCircles extends Fragment
                 Log.d(TAG,"Game Circles client not ready");
             }
         }
-    }
-
-    public boolean isSigned()
-    {
-        boolean isSigned = false;
-
-        if (agsClient != null)
+        else
         {
-                if (agsClient.getPlayerClient().isSignedIn())
-                {
-                    isSigned = true;
-                }
+            Toast.makeText(this.activity,"Loading game circle", Toast.LENGTH_SHORT).show();
         }
-        //This should be do it but how can I return this to Unity?
-        //I only know using a String in some project that I don't remember using this
-        // That is the reason of the UnityObjName
-        //TODO complete return value to Unity
-        return isSigned;
     }
 
-    public void check()
+    AmazonGamesCallback callback = new AmazonGamesCallback()
     {
+        @Override
+        public void onServiceReady(AmazonGamesClient arg0)
+        {
+            agsClient = arg0;
+            gameServicesAvaliable = true;
+        }
 
-    }
-
-    //endregion
+        @Override
+        public void onServiceNotReady(AmazonGamesStatus arg0)
+        {
+            gameServicesAvaliable = false;
+        }
+    };
+    EnumSet<AmazonGamesFeature> myGameFeatures = EnumSet.of(AmazonGamesFeature.Achievements, AmazonGamesFeature.Leaderboards);
 }
